@@ -4,7 +4,7 @@
   "description": "Система учёта ключей для Киевстар",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "npm run setup:prod && npm run botdata:import && node src/server.js",
     "dev": "node src/server.js",
     "test": "node --test --test-isolation=none",
     "docker:db:up": "docker compose up -d",
