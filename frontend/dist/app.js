@@ -1,3 +1,4 @@
+window.initLegacyApp = function() {
 (function () {
   'use strict';
   const API_BASE = '';
@@ -421,82 +422,6 @@ function updateUI() {
       }
     });
   }
-
-  // Activity switching (dropdown menu)
-  document.querySelectorAll('.activity-menu-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const activity = btn.dataset.activity;
-      currentActivity = activity;
-      
-      document.querySelectorAll('.activity-menu-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      
-      const searchSection = document.querySelector('.search-section');
-      const actionsSection = document.querySelector('.actions-section');
-      const historySectionEl = document.getElementById('history-section');
-      const accessSection = document.getElementById('access-section');
-      const peopleSection = document.getElementById('people-section');
-      const zoneAccessModal = document.getElementById('zone-access-modal');
-      
-      if (activity === 'keys') {
-        if (searchSection) searchSection.style.display = 'block';
-        if (actionsSection) actionsSection.style.display = 'block';
-        if (peopleSection) peopleSection.style.display = 'block';
-        if (historySectionEl && historySectionEl.style.display === 'block') historySectionEl.style.display = 'block';
-        if (accessSection) accessSection.style.display = 'none';
-        // Close zone modal when switching to keys
-        if (zoneAccessModal) zoneAccessModal.style.display = 'none';
-        
-        // Update header
-        const headerMain = document.querySelector('.header-main');
-        const logo = headerMain.querySelector('.logo');
-        const tagline = headerMain.querySelector('.tagline');
-        logo.textContent = 'Учёт ключей';
-        tagline.textContent = 'Киевстар — ключи от оборудования';
-      } else {
-        if (searchSection) searchSection.style.display = 'none';
-        if (actionsSection) actionsSection.style.display = 'none';
-        if (peopleSection) peopleSection.style.display = 'none';
-        if (historySectionEl) historySectionEl.style.display = 'none';
-        if (accessSection) accessSection.style.display = 'block';
-        
-        // Update header
-        const headerMain = document.querySelector('.header-main');
-        const logo = headerMain.querySelector('.logo');
-        const tagline = headerMain.querySelector('.tagline');
-        logo.textContent = 'Доступ к зонам';
-        tagline.textContent = 'Киевстар — управление доступом';
-      }
-      
-      // Close menu after selection
-      closeActivityMenu();
-    });
-  });
-
-  // Mobile menu toggle
-  function toggleActivityMenu() {
-    const menu = document.getElementById('activity-menu');
-    menu.classList.toggle('show');
-  }
-
-  function closeActivityMenu() {
-    const menu = document.getElementById('activity-menu');
-    menu.classList.remove('show');
-  }
-
-  document.getElementById('mobile-menu-btn').addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleActivityMenu();
-  });
-
-  // Close menu when clicking outside
-  document.addEventListener('click', (e) => {
-    const menu = document.getElementById('activity-menu');
-    const btn = document.getElementById('mobile-menu-btn');
-    if (!menu.contains(e.target) && !btn.contains(e.target)) {
-      closeActivityMenu();
-    }
-  });
 
   // Zone buttons in access section
   document.querySelectorAll('.zone-btn').forEach(btn => {
@@ -2950,10 +2875,10 @@ saveZoneAccessData();
     updateAdminMode();
     let people = getPeopleWithKeys();
     
-    // Обычные пользователи теперь видят всех, кто взял ключи
-    // if (!isAdmin() && currentUser) {
-    //   people = people.filter(name => name === currentUser.name);
-    // }
+    // Non-admins can only return their own keys
+    if (!isAdmin() && currentUser) {
+      people = people.filter(name => name === currentUser.name);
+    }
     
     peopleList.innerHTML = '';
     
@@ -2987,11 +2912,11 @@ saveZoneAccessData();
       return;
     }
 
-    // Обычные пользователи могут просматривать ключи других, но не могут возвращать
-    // if (!isAdmin() && currentUser && selectedPerson !== currentUser.name) {
-    //   viewPanel.style.display = 'none';
-    //   return;
-    // }
+    // Non-admins cannot view or return other people's keys
+    if (!isAdmin() && currentUser && selectedPerson !== currentUser.name) {
+      viewPanel.style.display = 'none';
+      return;
+    }
 
     viewPanel.style.display = '';
     viewPersonName.textContent = `Ключи у: ${selectedPerson}`;
@@ -3102,8 +3027,9 @@ saveZoneAccessData();
         item.appendChild(commentInfo);
       }
 
-      // Все пользователи могут добавлять/редактировать комментарии
-      item.appendChild(createBundleCommentEditor(bundle.bundleId, bundle.comment || '', { showCancel: false }));
+      if (isAdmin()) {
+        item.appendChild(createBundleCommentEditor(bundle.bundleId, bundle.comment || '', { showCancel: false }));
+      }
       
       viewBundles.appendChild(item);
     });
@@ -3144,9 +3070,6 @@ saveZoneAccessData();
         renderViewPanel();
       }
     });
-
-    viewButtons.appendChild(returnBtn);
-    viewButtons.appendChild(returnAllBtn);
     
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
@@ -3880,3 +3803,5 @@ if (window.VoiceInput && typeof window.VoiceInput.attach === 'function') {
 
 
 
+
+};
