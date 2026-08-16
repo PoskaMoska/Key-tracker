@@ -3,6 +3,7 @@ const User = require('./models/User');
 const KeyState = require('./models/KeyState');
 const History = require('./models/History');
 const ZoneAccess = require('./models/ZoneAccess');
+const PushSubscription = require('./models/PushSubscription');
 
 async function initDatabase() {
   await database.connect();
@@ -16,6 +17,7 @@ async function initDatabase() {
   await KeyState.createTable();
   await History.createTable();
   await ZoneAccess.createTable();
+  await PushSubscription.createTable();
   await User.addRoleColumn();
   await User.migrateRoles();
 

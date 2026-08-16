@@ -298,6 +298,7 @@
       currentUser = data.user;
       if (window.api) window.api.token = data.token;
       updateUI();
+      initPushNotifications();
       return true;
     } catch (e) {
       console.error('Auto-login error:', e);
@@ -354,6 +355,53 @@ function updateUI() {
       }
     }
   }
+
+  async function initPushNotifications() {
+    if (!currentUser || !('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+    if (Notification.permission === 'denied') return;
+
+    if (Notification.permission !== 'granted') {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') return;
+    }
+
+    try {
+      const vapidRes = await fetch(API_BASE + '/api/push/vapid-key');
+      if (!vapidRes.ok) return;
+      const { publicKey } = await vapidRes.json();
+
+      const registration = await navigator.serviceWorker.register('/sw.js');
+      const existing = await registration.pushManager.getSubscription();
+      if (existing) {
+        await existing.unsubscribe();
+      }
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicKey),
+      });
+
+      await fetch(API_BASE + '/api/push/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + authToken,
+        },
+        body: JSON.stringify({ subscription }),
+      });
+    } catch (e) {
+      console.error('Push notification init error:', e);
+    }
+  }
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+  }
+
   if (btnLogin) {
     btnLogin.addEventListener('click', async () => {
       const name = loginNameInput.value.trim();
@@ -367,8 +415,9 @@ function updateUI() {
       const success = await login(name, password);
       if (success) {
         console.log('Авторизация успешна');
-        load(); // Загружаем данные после входа
-        renderPeopleSelect(); // Обновляем список сотрудников с учетом текущего пользователя
+        load();
+        renderPeopleSelect();
+        initPushNotifications();
       }
     });
   }
@@ -3806,6 +3855,12 @@ if (window.VoiceInput && typeof window.VoiceInput.attach === 'function') {
     }
     load();
     render();
+    // Register service worker for push notifications
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch((e) => {
+        console.error('SW registration error:', e);
+      });
+    }
     // Mobile fix: first tap on input inside fixed overlay often doesn't
     // open keyboard. Focus the login field on the very first touch.
     if (loginNameInput) {

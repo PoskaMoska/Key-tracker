@@ -9,6 +9,8 @@ const { handleGetState, handleTakeKeys, handleReturnKeys, handleSetComment, hand
 const { handleGetUsers, handleAddUser, handleUpdateUser, handleDeleteUser, handleChangePassword } = require('./routes/users');
 const { handleGetZoneAccess, handleGetZoneAccessFull, handleReplaceZoneAccess } = require('./routes/zoneAccess');
 const { handleParseVoice } = require('./routes/voice');
+const { handleSubscribe, handleUnsubscribe, handleGetVapidKey, handleTestPush } = require('./routes/push');
+const PushService = require('./services/PushService');
 const botdataRoutes = require('./routes/botdata');
 const zoneAddressRoutes = require('./routes/zoneAddresses');
 const KeyService = require('./services/KeyService');
@@ -158,6 +160,10 @@ function matchRoute(pathname, method) {
     'GET /api/botdata/equipments': withErrorHandling(requireAuth(authenticate, botdataRoutes)),
     'GET /api/botdata/equipments/house/:houseId': withErrorHandling(requireAuth(authenticate, botdataRoutes)),
     'POST /api/botdata/import': withErrorHandling(requireRole(checkRole, ['ADMIN'], botdataRoutes)),
+    'GET /api/push/vapid-key': withErrorHandling(handleGetVapidKey),
+    'POST /api/push/subscribe': withErrorHandling(requireAuth(authenticate, handleSubscribe)),
+    'POST /api/push/unsubscribe': withErrorHandling(requireAuth(authenticate, handleUnsubscribe)),
+    'POST /api/push/test': withErrorHandling(requireAuth(authenticate, handleTestPush)),
   };
 
   const routeKey = `${method} ${pathname}`;
@@ -232,6 +238,30 @@ async function startServer(port = DEFAULT_PORT) {
       console.error('SSE update error:', error);
     });
   }, 5000);
+
+  // Schedule push notification check at 21:00 every day
+  const scheduleEveningReminder = () => {
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(21, 0, 0, 0);
+    if (target <= now) {
+      target.setDate(target.getDate() + 1);
+    }
+    const delay = target.getTime() - now.getTime();
+    console.log(`[Push] Evening reminder scheduled at ${target.toLocaleString()}`);
+
+    setTimeout(async () => {
+      try {
+        console.log('[Push] Evening reminder: checking unreturned keys...');
+        const results = await PushService.notifyUsersWithUnreturnedKeys();
+        console.log(`[Push] Reminded ${results.length} users`);
+      } catch (err) {
+        console.error('[Push] Evening reminder error:', err);
+      }
+      scheduleEveningReminder();
+    }, delay);
+  };
+  scheduleEveningReminder();
 
   startedServer = server;
   return server;
