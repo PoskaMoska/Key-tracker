@@ -542,6 +542,7 @@ body.admin-mode .access-admin-log[hidden],
   cursor: pointer;
   transition: background 0.15s, border 0.15s;
   border: 1px solid transparent;
+  flex-wrap: wrap;
 }
 
 .bundle-item:hover {
@@ -587,6 +588,9 @@ body.admin-mode .access-admin-log[hidden],
   gap: 0.45rem;
   padding-left: 1.75rem;
   flex-wrap: wrap;
+  width: 100%;
+  margin-top: 0.4rem;
+  box-sizing: border-box !important;
 }
 
 .bundle-comment-editor__input {
@@ -1106,7 +1110,8 @@ body.admin-mode .access-admin-log[hidden],
 }
 
 .view-bundle-item .bundle-comment-editor {
-  flex: 1 1 100%;
+  flex: 0 0 100%;
+  width: 100%;
   padding-left: 2rem;
   padding-top: 0.15rem;
 }

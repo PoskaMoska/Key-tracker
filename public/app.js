@@ -346,7 +346,7 @@ function updateUI() {
     // Update header profile actions
     const headerProfileActions = document.getElementById('header-profile-actions');
     if (headerProfileActions) {
-      if (currentUser) {
+      if (currentUser && !isAdmin()) {
         headerProfileActions.style.display = 'flex';
         const headerUserLabel = document.getElementById('header-current-user-label');
         if (headerUserLabel) {
@@ -502,6 +502,28 @@ function updateUI() {
     e.stopPropagation();
     toggleActivityMenu();
   });
+
+  // Custom Alert Override
+window.originalAlert = window.alert;
+window.alert = function(message) {
+  const modal = document.getElementById('custom-alert-modal');
+  const msgEl = document.getElementById('custom-alert-message');
+  if (modal && msgEl) {
+    msgEl.textContent = message;
+    modal.style.display = 'flex';
+  } else {
+    window.originalAlert(message);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const closeAlertBtn = document.getElementById('close-custom-alert-modal');
+  const okAlertBtn = document.getElementById('custom-alert-ok-btn');
+  const modal = document.getElementById('custom-alert-modal');
+  const closeAlert = () => { if (modal) modal.style.display = 'none'; };
+  if (closeAlertBtn) closeAlertBtn.addEventListener('click', closeAlert);
+  if (okAlertBtn) okAlertBtn.addEventListener('click', closeAlert);
+});
 
   // Close menu when clicking outside
   document.addEventListener('click', (e) => {
@@ -2606,12 +2628,6 @@ saveZoneAccessData();
     if (!personName) return;
     const field = personName.closest('.field');
     if (!field) return;
-
-    if (isAdmin()) {
-      field.style.display = '';
-      return;
-    }
-
     field.style.display = 'none';
   }
 
@@ -3637,9 +3653,7 @@ if (window.VoiceInput && typeof window.VoiceInput.attach === 'function') {
 
   btnTake.addEventListener('click', () => {
     const bundleIds = getSelectedBundleIds();
-    const name = isAdmin()
-      ? personName.value
-      : String(currentUser && currentUser.name ? currentUser.name : '').trim();
+    const name = String(currentUser && currentUser.name ? currentUser.name : '').trim();
     if (!name) {
       alert(isAdmin() ? 'Выбери сотрудника из списка.' : 'Не удалось определить авторизованного пользователя.');
       return;
