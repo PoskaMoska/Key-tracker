@@ -337,27 +337,10 @@
 function updateUI() {
     if (!loginScreen) return;
     
-    // Update current user label (old sidebar label if exists)
+    // Update current user label
     const userLabel = document.getElementById('current-user-label');
     if (userLabel) {
       userLabel.textContent = currentUser ? currentUser.name || currentUser.login || '' : '';
-    }
-    
-    // Update new header profile widget
-    const headerProfile = document.getElementById('header-user-profile');
-    if (headerProfile) {
-      if (currentUser) {
-        headerProfile.style.display = 'flex';
-        const nameText = currentUser.name || currentUser.login || 'Пользователь';
-        document.getElementById('header-user-name').textContent = nameText;
-        document.getElementById('header-user-role').textContent = currentUser.role || 'USER';
-        
-        // Setup initial for avatar
-        let initial = nameText.charAt(0).toUpperCase();
-        document.getElementById('header-user-avatar').textContent = initial;
-      } else {
-        headerProfile.style.display = 'none';
-      }
     }
     
     // Если пользователь вошел - скрываем экран входа
@@ -3832,13 +3815,6 @@ if (window.VoiceInput && typeof window.VoiceInput.attach === 'function') {
   if (btnSwitchProfile) {
     btnSwitchProfile.addEventListener('click', () => {
       if (peopleModal) peopleModal.style.display = 'none';
-      logout();
-    });
-  }
-
-  const headerLogoutBtn = document.getElementById('header-logout-btn');
-  if (headerLogoutBtn) {
-    headerLogoutBtn.addEventListener('click', () => {
       logout();
     });
   }
