@@ -3201,6 +3201,14 @@ body.is-admin .admin-only {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+.btn-switch-profile:hover {
+  background: rgba(239, 68, 68, 0.28);
+  color: #ffe4e6;
 }
 
 /* Login actions */

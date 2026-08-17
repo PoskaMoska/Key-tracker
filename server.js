@@ -1,4 +1,4 @@
-﻿const http = require('http');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
@@ -109,8 +109,7 @@ async function initDatabase() {
       const adminHash = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'admin123', 10);
       const userHash = await bcrypt.hash(process.env.USER_PASSWORD || 'user123', 10);
       memoryData.people = [
-        { id: 1, name: 'Администратор', phone: '+380501234567', isAdmin: true, passwordHash: adminHash },
-        { id: 2, name: 'Пользователь', phone: '', isAdmin: false, passwordHash: userHash }
+        { id: 1, name: 'Администратор', phone: '+380501234567', isAdmin: true, passwordHash: adminHash }
       ];
       console.log('Default in-memory users created with hashed passwords');
     }

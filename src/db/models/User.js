@@ -26,8 +26,6 @@ class User {
     const bcrypt = require('bcrypt');
     const defaultUsers = [
       { name: 'Администратор', password: 'admin123', isAdmin: true },
-      { name: 'Админ', password: 'admin123', isAdmin: true },
-      { name: 'Обычный Пользователь', password: 'user123', isAdmin: false }
     ];
 
     for (const u of defaultUsers) {
