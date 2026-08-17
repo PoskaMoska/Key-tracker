@@ -46,6 +46,15 @@ async function main() {
       throw new Error('DATABASE_URL or POSTGRES_URL is not set');
     }
 
+    // Check if there are any users already
+    const countRes = await database.query('SELECT COUNT(*) FROM users');
+    const userCount = parseInt(countRes.rows[0].count, 10);
+    
+    if (userCount > 0) {
+      console.log('Users already exist in the database. Skipping default users setup to prevent recreating deleted users.');
+      return;
+    }
+
     console.log('Setting up Railway users...');
 
     for (const user of DEFAULT_USERS) {
