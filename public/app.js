@@ -337,10 +337,24 @@
 function updateUI() {
     if (!loginScreen) return;
     
-    // Update current user label
+    // Update current user label (for admin modal)
     const userLabel = document.getElementById('current-user-label');
     if (userLabel) {
       userLabel.textContent = currentUser ? currentUser.name || currentUser.login || '' : '';
+    }
+
+    // Update header profile actions
+    const headerProfileActions = document.getElementById('header-profile-actions');
+    if (headerProfileActions) {
+      if (currentUser) {
+        headerProfileActions.style.display = 'flex';
+        const headerUserLabel = document.getElementById('header-current-user-label');
+        if (headerUserLabel) {
+          headerUserLabel.textContent = currentUser.name || currentUser.login || '';
+        }
+      } else {
+        headerProfileActions.style.display = 'none';
+      }
     }
     
     // Если пользователь вошел - скрываем экран входа
@@ -3815,6 +3829,13 @@ if (window.VoiceInput && typeof window.VoiceInput.attach === 'function') {
   if (btnSwitchProfile) {
     btnSwitchProfile.addEventListener('click', () => {
       if (peopleModal) peopleModal.style.display = 'none';
+      logout();
+    });
+  }
+
+  const headerBtnSwitchProfile = document.getElementById('header-btn-switch-profile');
+  if (headerBtnSwitchProfile) {
+    headerBtnSwitchProfile.addEventListener('click', () => {
       logout();
     });
   }
