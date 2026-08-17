@@ -3062,7 +3062,14 @@ saveZoneAccessData();
     // По умолчанию помечаем все связки для возврата
     selectedReturnBundleIds = new Set(personBundles.map((b) => b.bundleId));
 
-    viewKeysInfo.textContent = `Всего: ${personBundles.length} связок. Выбери, какие вернуть:`;
+    // Проверяем, может ли текущий пользователь возвращать ключи
+    const canReturn = isAdmin() || (currentUser && selectedPerson === currentUser.name);
+
+    if (canReturn) {
+      viewKeysInfo.textContent = `Всего: ${personBundles.length} связок. Выбери, какие вернуть:`;
+    } else {
+      viewKeysInfo.textContent = `Всего связок: ${personBundles.length}`;
+    }
 
     viewBundles.innerHTML = '';
     
@@ -3091,7 +3098,9 @@ saveZoneAccessData();
       timeInfo.className = 'view-bundle-time';
       timeInfo.textContent = `Взято: ${formatTime(bundle.takenAt)}`;
       
-      item.appendChild(checkbox);
+      if (canReturn) {
+        item.appendChild(checkbox);
+      }
       item.appendChild(label);
       item.appendChild(timeInfo);
 
@@ -3155,9 +3164,6 @@ saveZoneAccessData();
       renderViewPanel();
     });
     
-    // Проверяем, может ли текущий пользователь возвращать ключи
-    const canReturn = isAdmin() || (currentUser && selectedPerson === currentUser.name);
-
     if (canReturn) {
       viewButtons.appendChild(returnBtn);
       viewButtons.appendChild(returnAllBtn);
