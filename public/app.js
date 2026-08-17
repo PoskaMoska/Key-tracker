@@ -3145,9 +3145,6 @@ saveZoneAccessData();
       }
     });
 
-    viewButtons.appendChild(returnBtn);
-    viewButtons.appendChild(returnAllBtn);
-    
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'btn btn-danger';
@@ -3158,8 +3155,13 @@ saveZoneAccessData();
       renderViewPanel();
     });
     
-    viewButtons.appendChild(returnBtn);
-    viewButtons.appendChild(returnAllBtn);
+    // Проверяем, может ли текущий пользователь возвращать ключи
+    const canReturn = isAdmin() || (currentUser && selectedPerson === currentUser.name);
+
+    if (canReturn) {
+      viewButtons.appendChild(returnBtn);
+      viewButtons.appendChild(returnAllBtn);
+    }
     viewButtons.appendChild(closeBtn);
   }
 
