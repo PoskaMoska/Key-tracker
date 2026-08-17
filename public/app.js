@@ -346,7 +346,15 @@ function updateUI() {
     // Update header profile actions
     const headerProfileActions = document.getElementById('header-profile-actions');
     if (headerProfileActions) {
-      headerProfileActions.style.display = 'none';
+      if (currentUser && !isAdmin()) {
+        headerProfileActions.style.display = 'flex';
+        const headerUserLabel = document.getElementById('header-current-user-label');
+        if (headerUserLabel) {
+          headerUserLabel.textContent = currentUser.name || currentUser.login || '';
+        }
+      } else {
+        headerProfileActions.style.display = 'none';
+      }
     }
     
     // Если пользователь вошел - скрываем экран входа
